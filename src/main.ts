@@ -1,9 +1,10 @@
-import { NestApplication, NestFactory } from '@nestjs/core';
+import { NestApplication, NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './modules/app/app.module';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+import { Logger, ClassSerializerInterceptor } from '@nestjs/common';
 import { LoggerInterceptor } from './common/interceptors/logger.interceptor';
 import { setupSwagger } from './config/swagger.config';
+import { corsOptions } from './config/cors.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,6 +12,15 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggerInterceptor());
 
   setupSwagger(app);
+
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector), {
+      excludePrefixes: ['password', 'createdAt', 'updatedAt'],
+      ignoreDecorators: true,
+    }),
+  );
+
+  app.enableCors(corsOptions);
 
   const configService = app.get(ConfigService);
   const PORT = configService.get<number>('PORT') || 3000;
