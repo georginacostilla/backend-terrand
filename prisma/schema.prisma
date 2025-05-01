@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -7,4 +6,41 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  lastName  String
+  email     String   @unique
+  password  String
+  recipes   Recipe[]
+  ratings   Rating[]
+  createdAt DateTime @default(now())
+}
+
+model Recipe {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  ingredients String
+  imageUrl    String?
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  ratings     Rating[]
+  publicId    String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Rating {
+  id        String   @id @default(uuid())
+  value     Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  recipe    Recipe   @relation(fields: [recipeId], references: [id])
+  recipeId  String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, recipeId]) // Un usuario solo puede calificar una vez cada receta
 }

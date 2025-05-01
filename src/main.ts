@@ -3,11 +3,14 @@ import { AppModule } from './modules/app/app.module';
 import { ConfigService } from '@nestjs/config';
 import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
 import { LoggerInterceptor } from './common/interceptors/logger.interceptor';
+import { setupSwagger } from './config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalInterceptors(new LoggerInterceptor());
+  
+  setupSwagger(app);
 
   const configService = app.get(ConfigService);
   const PORT = configService.get<number>('PORT') || 3000;
