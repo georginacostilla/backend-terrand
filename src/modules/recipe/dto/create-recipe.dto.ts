@@ -4,7 +4,8 @@ import {
     IsOptional,
     IsString,
     MaxLength,
-    MinLength
+    MinLength,
+    Length,
 } from 'class-validator';
 
 export class CreateRecipeDto {
@@ -33,4 +34,16 @@ export class CreateRecipeDto {
     @IsString({ message: 'La URL de la imagen debe ser una cadena de texto' })
     @IsOptional({ message: 'La URL de la imagen es opcional' })
     imageUrl?: string;
+
+    @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'ID del usuario que creó la receta', required: true })
+    @IsString({ message: 'El ID del usuario debe ser una cadena de texto' })
+    @IsNotEmpty({ message: 'El ID del usuario no puede estar vacío' })
+    @MaxLength(100, { message: 'El ID del usuario no puede exceder los 100 caracteres' })
+    userId: string;
+
+    @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000', description: 'ID público de la receta', required: true })
+    @IsString({ message: 'El ID público de la receta debe ser una cadena de texto' })
+    @IsNotEmpty({ message: 'El ID público de la receta no puede estar vacío' })
+    @Length(36, 36, { message: 'El ID público de la receta debe tener exactamente 36 caracteres' })
+    publicId: string;
 }

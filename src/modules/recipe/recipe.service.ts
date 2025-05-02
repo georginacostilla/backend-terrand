@@ -1,26 +1,65 @@
 import { Injectable } from '@nestjs/common';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class RecipeService {
-  create(createRecipeDto: CreateRecipeDto) {
-    return 'This action adds a new recipe';
+  constructor(
+    private readonly prisma: PrismaService,
+  ) { }
+
+  async create(newReciper: CreateRecipeDto) {
+    const { title, description, ingredients, imageUrl, userId } = newReciper;
+
+    try {
+      const recipe = await this.prisma.recipe.create({
+        data: {
+          title,
+          description,
+          ingredients,
+          imageUrl,
+          userId,
+          publicId: uuidv4(),
+        },
+      });
+      return recipe;
+    } catch (error) {
+      throw new Error('Error al crear la receta' + error.message);
+    }
   }
 
-  findAll() {
-    return `This action returns all recipe`;
+  async findAll() {
+    return await this.prisma.recipe.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} recipe`;
+  async findOne(id: string) {
+    const recipe = await this.prisma.recipe.findUnique({
+      where: { id },
+    });
+
+    if (!recipe) {
+      throw new Error(`Receta con ID ${id} no encontrada`);
+    }
+
+    return recipe;
   }
 
-  update(id: number, updateRecipeDto: UpdateRecipeDto) {
-    return `This action updates a #${id} recipe`;
-  }
+  async update(id: string, updateRecipeDto: UpdateRecipeDto) {
+    const existingRecipe = await this.prisma.recipe.findUnique({
+      where: { id },
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} recipe`;
+    if (!existingRecipe) {
+      throw new Error(`Receta con ID ${id} no encontrada`);
+    }
+
+    const updatedRecipe = await this.prisma.recipe.update({
+      where: { id },
+      data: updateRecipeDto,
+    });
+
+    return updatedRecipe;
   }
 }
