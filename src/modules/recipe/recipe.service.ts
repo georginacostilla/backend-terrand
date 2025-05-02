@@ -62,4 +62,12 @@ export class RecipeService {
 
     return updatedRecipe;
   }
+
+  // Método para encontrar receta por publicId
+  async findByPublicId(publicId: string) {
+    const recipe = await this.prisma.recipe.findUnique({
+      where: { publicId },
+    });
+    return recipe;
+  }
 }

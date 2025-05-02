@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, NotFoundException } from '@nestjs/common';
 import { RecipeService } from './recipe.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
@@ -50,5 +50,15 @@ export class RecipeController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRecipeDto: UpdateRecipeDto) {
     return this.recipeService.update(id, updateRecipeDto);
+  }
+
+  // Endpoint para obtener una receta por publicId
+  @Get(':publicId')
+  async getRecipeByPublicId(@Param('publicId') publicId: string) {
+    const recipe = await this.recipeService.findByPublicId(publicId);
+    if (!recipe) {
+      throw new NotFoundException(`Receta con publicId ${publicId} no encontrada`);
+    }
+    return recipe;
   }
 }
