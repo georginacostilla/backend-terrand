@@ -41,5 +41,8 @@ model Rating {
   recipeId  String
   createdAt DateTime @default(now())
 
-  @@unique([userId, recipeId]) // Un usuario solo puede calificar una vez cada receta
+  @@unique([userId, recipeId]) 
 }
+
+//Un usuario puede calificar muchas recetas, pero solo una vez cada una. 
+//Cada calificación (Rating) está asociada a un único usuario y a una única receta.
