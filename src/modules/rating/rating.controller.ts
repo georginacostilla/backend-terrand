@@ -1,34 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { RatingService } from './rating.service';
 import { CreateRatingDto } from './dto/create-rating.dto';
-import { UpdateRatingDto } from './dto/update-rating.dto';
+import { ApiCustomOperation } from 'src/common/decorator/swagger.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('rating')
+@ApiTags('Calificaciones')
+@Controller('calificaciones')
 export class RatingController {
-  constructor(private readonly ratingService: RatingService) {}
+  constructor(private readonly ratingService: RatingService) { }
 
+  @ApiCustomOperation({
+    summary: 'Crear calificación',
+    bodyType: CreateRatingDto,
+    responseStatus: 201,
+    responseDescription: 'Calificación creada correctamente',
+  })
   @Post()
   create(@Body() createRatingDto: CreateRatingDto) {
     return this.ratingService.create(createRatingDto);
   }
 
-  @Get()
-  findAll() {
-    return this.ratingService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ratingService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRatingDto: UpdateRatingDto) {
-    return this.ratingService.update(+id, updateRatingDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ratingService.remove(+id);
+  @ApiCustomOperation({
+    summary: 'Obtener la calificación de un usuario para una receta',
+    responseStatus: 200,
+    responseDescription: 'Calificación encontrada correctamente',
+  })
+  @Get('usuario/:userId/receta/:recipeId')
+  findByUserAndRecipe(
+    @Param('userId') userId: string,
+    @Param('recipeId') recipeId: string,
+  ) {
+    return this.ratingService.findByUserAndRecipe(userId, recipeId);
   }
 }
