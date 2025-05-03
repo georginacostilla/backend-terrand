@@ -1,26 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LoginAuthDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(private readonly prisma: PrismaService) { }
+
+  async register(user: CreateUserDto) {
+    try {
+      const newUser = await this.prisma.user.create({
+        data: user,
+      });
+      return newUser;
+    } catch (error) {
+      throw new Error('Error al registrar el usuario: ' + error.message);
+    }
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async login(user: LoginAuthDto) {
+    try {
+      const foundUser = await this.prisma.user.findUnique({
+        where: { email: user.email },
+      });
+      if (!foundUser) {
+        throw new Error('Usuario no encontrado');
+      }
+      return foundUser;
+    } catch (error) {
+      throw new Error('Error al iniciar sesión: ' + error.message);
+    }
   }
 }
