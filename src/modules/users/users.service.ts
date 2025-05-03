@@ -1,26 +1,32 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(private readonly prisma: PrismaService) { }
+
+  async findAll(): Promise<User[]> {
+    try {
+      return await this.prisma.user.findMany();
+    } catch (error) {
+      throw new Error('Error al obtener los usuarios');
+    }
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
+  async findById(id: string): Promise<User> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id },
+      });
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+      if (!user) {
+        throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+      }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+      return user;
+    } catch (error) {
+      throw new Error('Error al obtener el usuario');
+    }
   }
 }

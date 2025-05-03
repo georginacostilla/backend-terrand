@@ -1,22 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { User } from '@prisma/client';
 import { ApiCustomOperation } from 'src/common/decorator/swagger.decorator';
 
-@Controller('users')
+@ApiTags('Usuarios')
+@Controller('usuarios')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @ApiCustomOperation({
-    summary: 'Create user',
-    bodyType: CreateUserDto,
-    responseStatus: 201,
-    responseDescription: 'Usuario creado correctamente',
+    summary: 'Obtener todos los usuarios',
+    responseStatus: 200,
+    responseDescription: 'Usuarios obtenidos correctamente',
   })
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Get()
+  getAllUsers(): Promise<User[]> {
+    return this.usersService.findAll();
   }
 
-  
+  @ApiCustomOperation({
+    summary: 'Obtener usuario por ID',
+    responseStatus: 200,
+    responseDescription: 'Usuario obtenido correctamente',
+  })
+  @Get(':id')
+  getUserById(@Param('id') id: string): Promise<User> {
+    return this.usersService.findById(id);
+  }
 }
