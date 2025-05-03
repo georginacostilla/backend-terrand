@@ -36,7 +36,7 @@ export class RecipeController {
     responseStatus: 200,
     responseDescription: 'Receta obtenida correctamente',
   })
-  @Get(':id')
+  @Get('id/:id')
   findOne(@Param('id') id: string) {
     return this.recipeService.findOne(id);
   }
@@ -53,7 +53,7 @@ export class RecipeController {
   }
 
   // Endpoint para obtener una receta por publicId
-  @Get(':publicId')
+  @Get('public/:publicId')
   async getRecipeByPublicId(@Param('publicId') publicId: string) {
     const recipe = await this.recipeService.findByPublicId(publicId);
     if (!recipe) {
