@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { RatingService } from './rating.service';
 import { CreateRatingDto } from './dto/create-rating.dto';
 import { ApiCustomOperation } from 'src/common/decorator/swagger.decorator';
 import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
 @ApiTags('Calificaciones')
+@UseGuards(JwtAuthGuard)
 @Controller('calificaciones')
 export class RatingController {
   constructor(private readonly ratingService: RatingService) { }

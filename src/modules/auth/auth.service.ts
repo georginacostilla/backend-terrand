@@ -3,10 +3,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginAuthDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from 'src/common/interfaces';
+import { hashPassword } from 'src/utils/encryption';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService
+  ) { }
 
   async register(user: CreateUserDto) {
     const existingUser = await this.prisma.user.findUnique({
@@ -17,13 +22,11 @@ export class AuthService {
       throw new BadRequestException('El correo electrónico ya está registrado');
     }
 
-    const hashedPassword = await bcrypt.hash(user.password, 10);
-
     try {
       const newUser = await this.prisma.user.create({
         data: {
           ...user,
-          password: hashedPassword,
+          password: await hashPassword(user.password),
         },
       });
       return { message: 'Usuario creado exitosamente', user: newUser };
@@ -46,6 +49,19 @@ export class AuthService {
       throw new UnauthorizedException('Contraseña incorrecta');
     }
 
-    return { message: 'Inicio de sesión exitoso', user: foundUser };
+    const payload = {
+      id: foundUser.id,
+      email: foundUser.email,
+    };
+
+    const token = await this.createTokens(payload);
+
+    return { message: 'Inicio de sesión exitoso', user: foundUser, token };
+  }
+
+  private async createTokens(payload: JwtPayload, expiresIn: string = '15m') {
+    return {
+      accessToken: await this.jwtService.signAsync(payload, { expiresIn }),
+    };
   }
 }

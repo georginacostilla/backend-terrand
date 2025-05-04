@@ -5,12 +5,20 @@ import { Logger, ClassSerializerInterceptor } from '@nestjs/common';
 import { LoggerInterceptor } from './common/interceptors/logger.interceptor';
 import { setupSwagger } from './config/swagger.config';
 import { corsOptions } from './config/cors.config';
+import { ValidationPipe } from '@nestjs/common/pipes/validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalInterceptors(new LoggerInterceptor());
+
   app.setGlobalPrefix('api/v1');
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   setupSwagger(app);
 

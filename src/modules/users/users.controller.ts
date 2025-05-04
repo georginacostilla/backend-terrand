@@ -1,10 +1,10 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { ApiCustomOperation } from 'src/common/decorator/swagger.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
-@ApiTags('Usuarios')
+@UseGuards(JwtAuthGuard)
 @Controller('usuarios')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }

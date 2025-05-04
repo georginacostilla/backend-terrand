@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, NotFoundException, UseFilters, UseGuards } from '@nestjs/common';
 import { RecipeService } from './recipe.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { ApiCustomOperation } from 'src/common/decorator/swagger.decorator';
 import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
 
 @ApiTags('Recetas')
 @Controller('recetas')
@@ -16,6 +17,7 @@ export class RecipeController {
     responseStatus: 201,
     responseDescription: 'Receta creada correctamente',
   })
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createRecipeDto: CreateRecipeDto) {
     return this.recipeService.create(createRecipeDto);
@@ -26,6 +28,7 @@ export class RecipeController {
     responseStatus: 200,
     responseDescription: 'Recetas obtenidas correctamente',
   })
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
     return this.recipeService.findAll();
@@ -36,6 +39,7 @@ export class RecipeController {
     responseStatus: 200,
     responseDescription: 'Receta obtenida correctamente',
   })
+  @UseGuards(JwtAuthGuard)
   @Get('id/:id')
   findOne(@Param('id') id: string) {
     return this.recipeService.findOne(id);
@@ -47,12 +51,13 @@ export class RecipeController {
     responseStatus: 200,
     responseDescription: 'Receta actualizada correctamente',
   })
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRecipeDto: UpdateRecipeDto) {
     return this.recipeService.update(id, updateRecipeDto);
   }
 
-  // Endpoint para obtener una receta por publicId
+  // Ruta no protegida para obtener receta por publicId
   @Get('public/:publicId')
   async getRecipeByPublicId(@Param('publicId') publicId: string) {
     const recipe = await this.recipeService.findByPublicId(publicId);
