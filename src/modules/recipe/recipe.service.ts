@@ -3,6 +3,8 @@ import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { v4 as uuidv4 } from 'uuid';
+import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
+import { InternalServerErrorException } from '@nestjs/common/exceptions/internal-server-error.exception';
 
 @Injectable()
 export class RecipeService {
@@ -14,6 +16,19 @@ export class RecipeService {
     const { title, description, ingredients, imageUrl, userId } = newReciper;
 
     try {
+      const existingRecipe = await this.prisma.recipe.findFirst({
+        where: {
+          title,
+          userId,
+        },
+      });
+
+      if (existingRecipe) {
+        throw new ConflictException(
+          `Ya existe una receta con este título para el usuario.`,
+        );
+      }
+
       const recipe = await this.prisma.recipe.create({
         data: {
           title,
@@ -26,7 +41,11 @@ export class RecipeService {
       });
       return recipe;
     } catch (error) {
-      throw new Error('Error al crear la receta' + error.message);
+      if (error instanceof ConflictException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Hubo un problema al crear la receta. Por favor, inténtalo de nuevo más tarde.');
     }
   }
 
