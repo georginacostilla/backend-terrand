@@ -9,15 +9,3 @@ export const hashPassword = async (password: string): Promise<string> => {
         throw error;
     }
 };
-
-export const comparePassword = async (
-    providedPassword: string,
-    hashedPassword: string,
-): Promise<boolean> => {
-    try {
-        return await bcrypt.compare(providedPassword, hashedPassword);
-    } catch (error) {
-        Logger.error('Error al comparar la contraseña');
-        throw error;
-    }
-};

@@ -1,26 +1,67 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Injectable, BadRequestException, NotFoundException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LoginAuthDto } from './dto/login.dto';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from 'src/common/interfaces';
+import { hashPassword } from 'src/utils/encryption';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService
+  ) { }
+
+  async register(user: CreateUserDto) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: user.email },
+    });
+
+    if (existingUser) {
+      throw new BadRequestException('El correo electrónico ya está registrado');
+    }
+
+    try {
+      const newUser = await this.prisma.user.create({
+        data: {
+          ...user,
+          password: await hashPassword(user.password),
+        },
+      });
+      return { message: 'Usuario creado exitosamente', user: newUser };
+    } catch (error) {
+      throw new InternalServerErrorException('Error al registrar el usuario');
+    }
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async login(user: LoginAuthDto) {
+    const foundUser = await this.prisma.user.findUnique({
+      where: { email: user.email },
+    });
+
+    if (!foundUser) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const passwordValid = await bcrypt.compare(user.password, foundUser.password);
+    if (!passwordValid) {
+      throw new UnauthorizedException('Contraseña incorrecta');
+    }
+
+    const payload = {
+      id: foundUser.id,
+      email: foundUser.email,
+    };
+
+    const token = await this.createTokens(payload);
+
+    return { message: 'Inicio de sesión exitoso', user: foundUser, token };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  private async createTokens(payload: JwtPayload, expiresIn: string = '15m') {
+    return {
+      accessToken: await this.jwtService.signAsync(payload, { expiresIn }),
+    };
   }
 }
