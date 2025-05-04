@@ -58,6 +58,11 @@ export class RecipeController {
   }
 
   // Ruta no protegida para obtener receta por publicId
+  @ApiCustomOperation({
+    summary: 'Obtener receta por publicId - Ruta pública',
+    responseStatus: 200,
+    responseDescription: 'Receta obtenida correctamente',
+  })
   @Get('public/:publicId')
   async getRecipeByPublicId(@Param('publicId') publicId: string) {
     const recipe = await this.recipeService.findByPublicId(publicId);
