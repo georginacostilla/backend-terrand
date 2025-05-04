@@ -26,7 +26,7 @@ export class AuthService {
           password: hashedPassword,
         },
       });
-      return newUser;
+      return { message: 'Usuario creado exitosamente', user: newUser };
     } catch (error) {
       throw new InternalServerErrorException('Error al registrar el usuario');
     }

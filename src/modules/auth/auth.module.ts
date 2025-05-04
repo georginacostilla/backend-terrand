@@ -4,8 +4,8 @@ import { AuthController } from './auth.controller';
 import JwtModuleConfig from '../../config/jwt.config';
 
 @Module({
+  imports: [JwtModuleConfig()],
   controllers: [AuthController],
-  providers: [AuthService],
-  imports: [JwtModuleConfig()]
+  providers: [AuthService]
 })
 export class AuthModule { }
