@@ -65,6 +65,18 @@ export class RecipeService {
     return recipe;
   }
 
+  async findRecipesByUserId(userId: string) {
+    const recipes = await this.prisma.recipe.findMany({
+      where: { userId },
+    });
+
+    if (!recipes || recipes.length === 0) {
+      throw new Error(`No se encontraron recetas para el usuario con ID ${userId}`);
+    }
+
+    return recipes;
+  }
+
   async update(id: string, updateRecipeDto: UpdateRecipeDto) {
     const existingRecipe = await this.prisma.recipe.findUnique({
       where: { id },
