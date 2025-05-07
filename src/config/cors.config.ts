@@ -1,7 +1,7 @@
 import { CorsOptions } from "@nestjs/common/interfaces/external/cors-options.interface";
 
 export const corsOptions: CorsOptions = {
-    origin: ['http://localhost:3000', '*'], //cargar la url del frontend
+    origin: ['http://localhost:5173', '*'], 
     credentials: true,
     allowedHeaders: [
         'x-requested-with',

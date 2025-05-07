@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, NotFoundException, UseFilters, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, NotFoundException, UseFilters, UseGuards, Put } from '@nestjs/common';
 import { RecipeService } from './recipe.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
@@ -46,13 +46,28 @@ export class RecipeController {
   }
 
   @ApiCustomOperation({
+    summary: 'Obtener recetas por ID de usuario',
+    responseStatus: 200,
+    responseDescription: 'Recetas obtenidas correctamente',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Get('user-recipes/:id')
+  findRecipesByUserId(@Param('id') id: string) {
+    const recipe = this.recipeService.findRecipesByUserId(id);
+    if (!recipe) {
+      throw new NotFoundException(`Receta con ID ${id} no encontrada`);
+    }
+    return recipe;
+  }
+
+  @ApiCustomOperation({
     summary: 'Actualizar receta',
     bodyType: UpdateRecipeDto,
     responseStatus: 200,
     responseDescription: 'Receta actualizada correctamente',
   })
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateRecipeDto: UpdateRecipeDto) {
     return this.recipeService.update(id, updateRecipeDto);
   }
