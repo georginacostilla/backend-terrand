@@ -27,6 +27,8 @@ async function bootstrap() {
 
   app.enableCors(corsOptions);
 
+  setupSwagger(app);
+
   app.useGlobalInterceptors(new LoggerInterceptor());
 
   const configService = app.get(ConfigService);
@@ -41,7 +43,6 @@ async function bootstrap() {
     Logger.log(`Current Environment: ${NODE_ENV}`, NestApplication.name);
   });
 
-  setupSwagger(app);
   // URL de Swagger en la consola
   const swaggerUrl = '/api';
   Logger.log(`Swagger está disponible en: http://localhost:${PORT}${swaggerUrl}`);
