@@ -39,19 +39,13 @@ git clone https://github.com/georginacostilla/backend-terrand.git
 ```bash
 $ npm install
 ```
-3. Configurar las variables de entorno en el archivo .env
+3. Configurar las variables de entorno en el archivo .env ⚠️
+#### La entrega de la prueba incluirá un archivo .env con las variables de entorno para el backend, así como la colección de Postman utilizada para las pruebas. La base de datos está alojada en Supabase. 
 
 ## Ejecución del proyecto
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
 $ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
 
 ## Contribución
